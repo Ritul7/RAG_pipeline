@@ -1,11 +1,9 @@
 import numpy as np
 from google import genai
-from fastapi import FastAPI
 from sentence_transformers import SentenceTransformer, CrossEncoder
 from sklearn.metrics.pairwise import cosine_similarity
-from openai import OpenAI
 
-docs = [
+docs = [                                                    # This is a short n basic Knowledge Base
     "India is formerly known as Golden Bird",
     "Population wise, India is the lasrgest country followed by China",
     "India is 4th largest economy in the world. USA at first, China at second, Germany at third.",
@@ -17,15 +15,15 @@ docs = [
 model = SentenceTransformer("all-MiniLM-L6-v2")
 reranker = CrossEncoder("cross-encoder/ms-marco-MiniLM-L-6-v2")
 
-embeddings = model.encode(docs)
+embeddings = model.encode(docs)                     # Each document in the KB will be converted into vector
 
 def retrieve(query, top_k=20):
 
-    query_embedding = model.encode(query)
+    query_embedding = model.encode(query)           # Jo query aayi h, use embedding me convert krdiya
 
-    scores = cosine_similarity([query_embedding], embeddings)[0]
+    scores = cosine_similarity([query_embedding], embeddings)[0]            # Measuring cosine similarity of the query embedding, with the rest of embeedings in KB
 
-    indices = np.argsort(scores)[::-1][:top_k]
+    indices = np.argsort(scores)[::-1][:top_k]                              # Sorting the docs, jyada score comes first
 
     retrieved_docs = [docs[i] for i in indices]
     retrieved_scores = [scores[i] for i in indices]
@@ -70,7 +68,7 @@ def generate_answer(prompt):
 
     response = client.models.generate_content(
         model="gemini-3-flash-preview",
-        contents=prompt,          # For simple prompts, just pass the string
+        contents=prompt,          
         config={
             "system_instruction": "Answer only using provided context."
         }
@@ -88,17 +86,14 @@ def rag_pipeline(query):
 
     print("\nBest similarity score:", best_score)
 
-    # Threshold check
-    if best_score < 0.7:
+    if best_score < 0.7:                                            # Threshold value is 0.7
         return "I don't have enough information to answer that."
 
-    # Re-rank
-    reranked_docs = rerank(query, retrieved_docs)
+    reranked_docs = rerank(query, retrieved_docs)                   # Re ranking ho rhi h
 
-    # Take top 5
-    top_docs = reranked_docs[:5]
+    top_docs = reranked_docs[:5]                                    # Top 5 docs are returned for the context
 
-    prompt = build_prompt(query, top_docs)
+    prompt = build_prompt(query, top_docs)                          # Prompt is generated to sent it to LLM
 
     answer = generate_answer(prompt)
 
@@ -116,17 +111,6 @@ if __name__ == "__main__":
         answer = rag_pipeline(query)
 
         print("\nAnswer:\n", answer)
-
-
-
-
-
-
-
-
-
-
-
 
 
 
