@@ -2,6 +2,10 @@ import numpy as np
 from google import genai
 from sentence_transformers import SentenceTransformer, CrossEncoder
 from sklearn.metrics.pairwise import cosine_similarity
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 docs = [                                                    # This is a short n basic Knowledge Base
     "India is formerly known as Golden Bird",
@@ -64,7 +68,7 @@ If the answer is not contained in the context, say:
 
 def generate_answer(prompt):
 
-    client = genai.Client(api_key="AIzaSyAY49bOXeW_FDV7tEX2MajZHwqnZFcqb3M")
+    client = genai.Client(os.getenv("API_KEY"))
 
     response = client.models.generate_content(
         model="gemini-3-flash-preview",
@@ -111,6 +115,3 @@ if __name__ == "__main__":
         answer = rag_pipeline(query)
 
         print("\nAnswer:\n", answer)
-
-
-
