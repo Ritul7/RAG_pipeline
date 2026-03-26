@@ -114,4 +114,4 @@ if __name__ == "__main__":
 
         answer = rag_pipeline(query)
 
-        print("\nAnswer:\n", answer)
+        print("\nAnswer is:\n", answer)
